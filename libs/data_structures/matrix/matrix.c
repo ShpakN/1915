@@ -160,7 +160,7 @@ position getMinValuePos(matrix *m, matrix ***mm) {
         int min = 0;
         for (int i = 1; i < m->nCols; ++i) {
             if (mm[i][j] < mm[min][j]) {
-                mm[j] = (matrix *) min;
+                mm[j] = (matrix **) min;
             }
         }
     }
