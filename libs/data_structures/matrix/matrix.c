@@ -174,4 +174,3 @@ position getMaxValuePos(matrix m, matrix **mm) {
                 max = mm[i][j];
             }
 }
-
