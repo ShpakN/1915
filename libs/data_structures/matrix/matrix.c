@@ -1,5 +1,6 @@
 #include <malloc.h>
 #include <stdbool.h>
+#include <intrin.h>
 #include "matrix.h"
 
 matrix getMemMatrix(int nRows, int nCols) {
@@ -16,9 +17,9 @@ matrix *getMemArrayOfMatrices(int nMatrices, int nRows, int nCols) {
     return ms;
 }
 
-void freeMemMatrix(void *m, int n) {
+void freeMemMatrix(void **m, int n) {
     for (int i = 0; i < n; i++)
-        free(m);
+        free(m[i]);
 }
 
 void freeMemMatrices(matrix **ms, int nMatrices) {
@@ -44,12 +45,40 @@ void inputMatrices(matrix *ms, int nMatrices) {
     }
 }
 
-void outputMatrix(matrix m) {
-    return inputMatrix(&m);
+int MaxWidth(matrix m, matrix **mm) {
+    int maxWidth = 0;
+    char buffer[64];
+
+    for (int i = 0; i < m.nRows; ++i) {
+        for (int j = 0; j < m.nCols; ++j) {
+            sprintf(buffer, "%d", mm[i][j]);
+
+            int w = strlen(buffer);
+            if (w > maxWidth) {
+                maxWidth = w;
+            }
+        }
+    }
+
+    return maxWidth;
 }
 
-void outputMatrices(matrix *ms, int nMatrices) {
-    return inputMatrices(ms, nMatrices);
+void outputMatrix(matrix m, matrix **mm) {
+    int w = MaxWidth(m, mm);
+    for (int i = 0; i < m.nRows; ++i) {
+        for (int j = 0; j < m.nCols; ++j) {
+            printf("%*d%c", w, mm[i][j], (j == m.nCols - 1) ? '\n' : ' ');
+        }
+    }
+}
+
+void outputMatrices(matrix *ms, int nMatrices, matrix **mm) {
+    int w = MaxWidth(*ms, mm);
+    for (int i = 0; i < ms->nRows; ++i) {
+        for (int j = 0; j < ms->nCols; ++j) {
+            printf("%*d%c", w, mm[i][j], (j == ms->nCols - 1) ? '\n' : ' ');
+        }
+    }
 }
 
 void swapRows(matrix **m, int i1, int i2) {
@@ -112,21 +141,30 @@ bool areTwoMatricesEqual(matrix *m1, matrix *m2, matrix **mm1, matrix **mm2) {
 }
 
 bool isEMatrix(matrix *m, matrix ***mm) {
+    int kr = 1;
     for (int i = 0; i < m->nRows; i++) {
-        for (int j = 0; j < m->nCols; j++) {
-            if (i == j && mm[i][j] != 1) {
-                return true;
-            } else {
-                return false;
+        for (int j = 0; j < m->nCols; j++)
+            if (((i == j) && (mm[i][j] != 1)) || ((i != j) && (mm[i][j] != 0))) {
+                kr = 0;
+                break;
             }
+        if (kr == 1) {
+            return true;
+        } else {
+            return false;
         }
     }
 }
 
 bool issSymmetricMatrix(matrix *m, matrix ***mm) {
+    int kr = 1;
     for (int i = 0; i < m->nRows - 1; ++i) {
         for (int j = i + 1; j < m->nCols; ++j) {
-            if (mm[i][j] == mm[j][i]) {
+            if (mm[i][j] != mm[j][i]) {
+                kr = 0;
+                break;
+            }
+            if (kr == 1) {
                 return true;
             } else {
                 return false;
@@ -160,7 +198,7 @@ position getMinValuePos(matrix *m, matrix ***mm) {
         int min = 0;
         for (int i = 1; i < m->nCols; ++i) {
             if (mm[i][j] < mm[min][j]) {
-                mm[j] = (matrix **) min;
+                mm[j] = (matrix *) min;
             }
         }
     }
@@ -174,3 +212,4 @@ position getMaxValuePos(matrix m, matrix **mm) {
                 max = mm[i][j];
             }
 }
+
