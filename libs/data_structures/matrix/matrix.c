@@ -20,6 +20,7 @@ matrix *getMemArrayOfMatrices(int nMatrices, int nRows, int nCols) {
 void freeMemMatrix(void **m, int n) {
     for (int i = 0; i < n; i++)
         free(m[i]);
+    free(m);
 }
 
 void freeMemMatrices(matrix **ms, int nMatrices) {
